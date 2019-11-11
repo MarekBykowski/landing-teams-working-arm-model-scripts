@@ -42,6 +42,7 @@ platforms_rdinfra[rdn1edgex2]=1
 platforms_rdinfra[rde1edge]=1
 platforms_rdinfra[rddaniel]=1
 platforms_rdinfra[rddanielx2]=1
+platforms_rdinfra[rddanielx4]=1
 
 __print_examples()
 {
