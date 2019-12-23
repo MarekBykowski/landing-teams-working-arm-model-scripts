@@ -26,14 +26,16 @@ AUTOMATE="false"
 source ../../sgi_common_util.sh
 
 # Check that a path to the model has been provided
-if [ ! -e "$MODEL" ]; then
+if [ "$MODEL" == "" ]; then
 	#if no model path has been provided, assign a default path
 	MODEL="../../../../fastmodel/refinfra/models/Linux64_GCC-4.9/FVP_CSS_SGI-575"
-	if [ ! -f "$MODEL" ]; then
-		echo "ERROR: you should set variable MODEL to point to a valid SGI575 " \
-		     "model binary, currently it is set to \"$MODEL\""
-		exit 1
-	fi
+fi
+
+# Check that the path to the model exists.
+if [ ! -f "$MODEL" ]; then
+	echo "ERROR: you should set variable MODEL to point to a valid SGI575 " \
+	     "model binary, currently it is set to \"$MODEL\""
+	exit 1
 fi
 
 #Path to the binary models
@@ -112,23 +114,6 @@ while test $# -gt 0; do
 			shift
 			if test $# -gt 0; then
 				AUTOMATE=$1
-				MODEL_PARAMS="$MODEL_PARAMS \
-						-C css.scp.terminal_uart_aon.start_telnet=0 \
-						-C css.mcp.terminal_uart0.start_telnet=0 \
-						-C css.mcp.terminal_uart1.start_telnet=0 \
-						-C css.terminal_uart_ap.start_telnet=0 \
-						-C css.terminal_uart1_ap.start_telnet=0 \
-						-C soc.terminal_s0.start_telnet=0 \
-						-C soc.terminal_s1.start_telnet=0 \
-						-C soc.terminal_mcp.start_telnet=0 \
-						-C board.terminal_0.start_telnet=0 \
-						-C board.terminal_1.start_telnet=0 \
-						-C css.pl011_uart1_ap.out_file="ap-uart1"  \
-						-C soc.pl011_uart_mcp.out_file="soc-mcp-uart0" \
-						-C css.mcp.pl011_uart1_mcp.out_file="css-mcp_uart1" \
-						-C css.mcp.pl011_uart0_mcp.out_file="css-mcp_uart0" \
-						-C board.pl011_uart0.out_file="board-uart0" \
-						-C board.pl011_uart1.out_file="board-uart1""
 			fi
 			shift
 			;;
@@ -218,12 +203,31 @@ create_nor_flash_image "$PWD/nor1_flash.img"
 echo "NOR2 flash image: $PWD/nor2_flash.img"
 create_nor_flash_image "$PWD/nor2_flash.img"
 
+if [ "$AUTOMATE" == "true" ] ; then
+	MODEL_PARAMS="$MODEL_PARAMS \
+		-C disable_visualisation=true \
+		-C css.scp.terminal_uart_aon.start_telnet=0 \
+		-C css.mcp.terminal_uart0.start_telnet=0 \
+		-C css.mcp.terminal_uart1.start_telnet=0 \
+		-C css.terminal_uart_ap.start_telnet=0 \
+		-C css.terminal_uart1_ap.start_telnet=0 \
+		-C soc.terminal_s0.start_telnet=0 \
+		-C soc.terminal_s1.start_telnet=0 \
+		-C soc.terminal_mcp.start_telnet=0 \
+		-C board.terminal_0.start_telnet=0 \
+		-C board.terminal_1.start_telnet=0 \
+		"
+fi
+
 echo
 echo "Starting model "$MODEL_TYPE
 echo "  MODEL_PARAMS = "$MODEL_PARAMS
 echo "  EXTRA_PARAMS = "$EXTRA_MODEL_PARAMS
 echo "  UART Log     = "$PWD/${MODEL_TYPE,,}/${UART0_ARMTF_OUTPUT_FILE_NAME}
 echo
+
+# print the model version.
+${MODEL} --version
 
 PARAMS="-C css.cmn600.mesh_config_file=\"$PATH_TO_MODEL/SGI-575_cmn600.yml\" \
 	-C css.cmn600.force_on_from_start=1 \
@@ -248,15 +252,16 @@ PARAMS="-C css.cmn600.mesh_config_file=\"$PATH_TO_MODEL/SGI-575_cmn600.yml\" \
 	${MODEL_PARAMS} \
 	${EXTRA_MODEL_PARAMS}"
 
+
 if [ "$AUTOMATE" == "true" ] ; then
-	${MODEL} $PARAMS ${MODEL_PARAMS} ${EXTRA_MODEL_PARAMS} 2>&1 &
+	${MODEL} ${PARAMS} 2>&1 &
 else
-	${MODEL} $PARAMS ${MODEL_PARAMS} ${EXTRA_MODEL_PARAMS} 2>&1
+	${MODEL} ${PARAMS} 2>&1
 fi
-if [ "$?" == "0" ] ; then
-	echo "Model launched with pid: "$!
-	export MODEL_PID=$!
-else
+if [ "$?" != "0" ] ; then
 	echo "Failed to launch the model"
 	export MODEL_PID=0
+elif [ "$AUTOMATE" == "true" ] ; then
+	echo "Model launched with pid: "$!
+	export MODEL_PID=$!
 fi
