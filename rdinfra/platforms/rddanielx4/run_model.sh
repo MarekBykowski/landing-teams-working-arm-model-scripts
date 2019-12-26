@@ -304,6 +304,57 @@ echo
 ${MODEL} --version
 export FASTSIM_CMN600_INTERNAL_RNSAM=1
 
+TZC_BYPASS_PARAMS=" \
+	-C css0.mem.tzc0.tzc400.rst_gate_keeper=0x0f                \
+	-C css0.mem.tzc0.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css0.mem.tzc0.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css0.mem.tzc1.tzc400.rst_gate_keeper=0x0f                \
+	-C css0.mem.tzc1.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css0.mem.tzc1.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css0.mem.tzc2.tzc400.rst_gate_keeper=0x0f                \
+	-C css0.mem.tzc2.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css0.mem.tzc2.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css0.mem.tzc3.tzc400.rst_gate_keeper=0x0f                \
+	-C css0.mem.tzc3.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css0.mem.tzc3.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css1.mem.tzc0.tzc400.rst_gate_keeper=0x0f                \
+	-C css1.mem.tzc0.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css1.mem.tzc0.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css1.mem.tzc1.tzc400.rst_gate_keeper=0x0f                \
+	-C css1.mem.tzc1.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css1.mem.tzc1.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css1.mem.tzc2.tzc400.rst_gate_keeper=0x0f                \
+	-C css1.mem.tzc2.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css1.mem.tzc2.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css1.mem.tzc3.tzc400.rst_gate_keeper=0x0f                \
+	-C css1.mem.tzc3.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css1.mem.tzc3.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css2.mem.tzc0.tzc400.rst_gate_keeper=0x0f                \
+	-C css2.mem.tzc0.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css2.mem.tzc0.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css2.mem.tzc1.tzc400.rst_gate_keeper=0x0f                \
+	-C css2.mem.tzc1.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css2.mem.tzc1.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css2.mem.tzc2.tzc400.rst_gate_keeper=0x0f                \
+	-C css2.mem.tzc2.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css2.mem.tzc2.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css2.mem.tzc3.tzc400.rst_gate_keeper=0x0f                \
+	-C css2.mem.tzc3.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css2.mem.tzc3.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css3.mem.tzc0.tzc400.rst_gate_keeper=0x0f                \
+	-C css3.mem.tzc0.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css3.mem.tzc0.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css3.mem.tzc1.tzc400.rst_gate_keeper=0x0f                \
+	-C css3.mem.tzc1.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css3.mem.tzc1.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css3.mem.tzc2.tzc400.rst_gate_keeper=0x0f                \
+	-C css3.mem.tzc2.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css3.mem.tzc2.tzc400.rst_region_id_access_0=0xffffffff   \
+	-C css3.mem.tzc3.tzc400.rst_gate_keeper=0x0f                \
+	-C css3.mem.tzc3.tzc400.rst_region_attributes_0=0xc000000f  \
+	-C css3.mem.tzc3.tzc400.rst_region_id_access_0=0xffffffff   \
+	"
+
 PARAMS=" \
 	-C css0.cmn_rhodes.mesh_config_file=$PATH_TO_MODEL/rhodes_daniel_cfgxlr.yml \
 	-C css0.cmn_rhodes.force_on_from_start=1 \
@@ -390,6 +441,7 @@ PARAMS=" \
 	-C soc3.pl011_uart1.unbuffered_output=1 \
 	-C css3.pl011_uart_ap.unbuffered_output=1 \
 	${MODEL_PARAMS} \
+	${TZC_BYPASS_PARAMS} \
 	${EXTRA_MODEL_PARAMS}"
 
 if [ "$AUTOMATE" == "true" ] ; then
