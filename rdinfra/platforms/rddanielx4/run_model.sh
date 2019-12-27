@@ -46,14 +46,16 @@ AUTOMATE="false"
 source $PWD/../../../sgi/sgi_common_util.sh
 
 # Check that a path to the model has been provided
-if [ ! -e "$MODEL" ]; then
+if [ "$MODEL" == "" ]; then
 	#if no model path has been provided, assign a default path
 	MODEL="../../../../fastmodel/refinfra/models/Linux64_GCC-4.9/FVP_RD_Daniel_4XLR"
-	if [ ! -f "$MODEL" ]; then
-		echo "ERROR: you should set variable MODEL to point to a valid " \
-		     "RD-Daniel model binary, currently it is set to \"$MODEL\""
-		exit 1
-	fi
+fi
+
+# Check that the path to the model exists.
+if [ ! -f "$MODEL" ]; then
+	echo "ERROR: you should set variable MODEL to point to a valid FVP_RD_Daniel_4XLR" \
+	     "model binary, currently it is set to \"$MODEL\""
+	exit 1
 fi
 
 #Path to the binary models
@@ -132,39 +134,6 @@ while test $# -gt 0; do
 			shift
 			if test $# -gt 0; then
 				AUTOMATE=$1
-				MODEL_PARAMS="$MODEL_PARAMS \
-						-C css0.scp.terminal_uart_aon.start_telnet=0 \
-						-C css0.mcp.terminal_uart0.start_telnet=0 \
-						-C css0.mcp.terminal_uart1.start_telnet=0 \
-						-C css0.terminal_uart_ap.start_telnet=0 \
-						-C css0.terminal_uart1_ap.start_telnet=0 \
-						-C soc0.terminal_s0.start_telnet=0 \
-						-C soc0.terminal_s1.start_telnet=0 \
-						-C soc0.terminal_mcp.start_telnet=0 \
-						-C board0.terminal_0.start_telnet=0 \
-						-C board0.terminal_1.start_telnet=0 \
-						-C css0.pl011_uart1_ap.out_file="ap-uart1"  \
-						-C soc0.pl011_uart_mcp.out_file="soc-mcp-uart0" \
-						-C css0.mcp.pl011_uart1_mcp.out_file="css-mcp_uart1" \
-						-C css0.mcp.pl011_uart0_mcp.out_file="css-mcp_uart0" \
-						-C board0.pl011_uart0.out_file="board-uart0" \
-						-C board0.pl011_uart1.out_file="board-uart1"
-						-C css1.scp.terminal_uart_aon.start_telnet=0 \
-						-C css1.mcp.terminal_uart0.start_telnet=0 \
-						-C css1.mcp.terminal_uart1.start_telnet=0 \
-						-C css1.terminal_uart_ap.start_telnet=0 \
-						-C css1.terminal_uart1_ap.start_telnet=0 \
-						-C soc1.terminal_s0.start_telnet=0 \
-						-C soc1.terminal_s1.start_telnet=0 \
-						-C soc1.terminal_mcp.start_telnet=0 \
-						-C board1.terminal_0.start_telnet=0 \
-						-C board1.terminal_1.start_telnet=0 \
-						-C css1.pl011_uart1_ap.out_file="ap-uart1_1"  \
-						-C soc1.pl011_uart_mcp.out_file="soc-mcp-uart0_1" \
-						-C css1.mcp.pl011_uart1_mcp.out_file="css-mcp_uart1_1" \
-						-C css1.mcp.pl011_uart0_mcp.out_file="css-mcp_uart0_1" \
-						-C board1.pl011_uart0.out_file="board-uart0_1" \
-						-C board1.pl011_uart1.out_file="board-uart1_1""
 			fi
 			shift
 			;;
@@ -292,6 +261,51 @@ echo "NOR1 flash image Chip 3: $PWD/nor1_flash_3.img"
 create_nor_flash_image "$PWD/nor1_flash_3.img"
 echo "NOR2 flash image Chip 3: $PWD/nor2_flash_3.img"
 create_nor_flash_image "$PWD/nor2_flash_3.img"
+if [ "$AUTOMATE" == "true" ] ; then
+	MODEL_PARAMS="$MODEL_PARAMS \
+		-C disable_visualisation=true \
+		-C css0.scp.terminal_uart_aon.start_telnet=0 \
+		-C css0.mcp.terminal_uart0.start_telnet=0 \
+		-C css0.mcp.terminal_uart1.start_telnet=0 \
+		-C css0.terminal_uart_ap.start_telnet=0 \
+		-C css0.terminal_uart1_ap.start_telnet=0 \
+		-C soc0.terminal_s0.start_telnet=0 \
+		-C soc0.terminal_s1.start_telnet=0 \
+		-C soc0.terminal_mcp.start_telnet=0 \
+		-C board0.terminal_0.start_telnet=0 \
+		-C board0.terminal_1.start_telnet=0 \
+		-C css1.scp.terminal_uart_aon.start_telnet=0 \
+		-C css1.mcp.terminal_uart0.start_telnet=0 \
+		-C css1.mcp.terminal_uart1.start_telnet=0 \
+		-C css1.terminal_uart_ap.start_telnet=0 \
+		-C css1.terminal_uart1_ap.start_telnet=0 \
+		-C soc1.terminal_s0.start_telnet=0 \
+		-C soc1.terminal_s1.start_telnet=0 \
+		-C soc1.terminal_mcp.start_telnet=0 \
+		-C board1.terminal_0.start_telnet=0 \
+		-C board1.terminal_1.start_telnet=0 \
+		-C css2.scp.terminal_uart_aon.start_telnet=0 \
+		-C css2.mcp.terminal_uart0.start_telnet=0 \
+		-C css2.mcp.terminal_uart1.start_telnet=0 \
+		-C css2.terminal_uart_ap.start_telnet=0 \
+		-C css2.terminal_uart1_ap.start_telnet=0 \
+		-C soc2.terminal_s0.start_telnet=0 \
+		-C soc2.terminal_s1.start_telnet=0 \
+		-C soc2.terminal_mcp.start_telnet=0 \
+		-C board2.terminal_0.start_telnet=0 \
+		-C board2.terminal_1.start_telnet=0 \
+		-C css3.scp.terminal_uart_aon.start_telnet=0 \
+		-C css3.mcp.terminal_uart0.start_telnet=0 \
+		-C css3.mcp.terminal_uart1.start_telnet=0 \
+		-C css3.terminal_uart_ap.start_telnet=0 \
+		-C css3.terminal_uart1_ap.start_telnet=0 \
+		-C soc3.terminal_s0.start_telnet=0 \
+		-C soc3.terminal_s1.start_telnet=0 \
+		-C soc3.terminal_mcp.start_telnet=0 \
+		-C board3.terminal_0.start_telnet=0 \
+		-C board3.terminal_1.start_telnet=0 \
+		"
+fi
 
 echo
 echo "Starting model "$MODEL_TYPE
@@ -445,14 +459,14 @@ PARAMS=" \
 	${EXTRA_MODEL_PARAMS}"
 
 if [ "$AUTOMATE" == "true" ] ; then
-	${MODEL} $PARAMS ${MODEL_PARAMS} ${EXTRA_MODEL_PARAMS} 2>&1 &
+	${MODEL} ${PARAMS} 2>&1 &
 else
-	${MODEL} $PARAMS ${MODEL_PARAMS} ${EXTRA_MODEL_PARAMS} 2>&1
+	${MODEL} ${PARAMS} 2>&1
 fi
-if [ "$?" == "0" ] ; then
-	echo "Model launched with pid: "$!
-	export MODEL_PID=$!
-else
+if [ "$?" != "0" ] ; then
 	echo "Failed to launch the model"
 	export MODEL_PID=0
+elif [ "$AUTOMATE" == "true" ] ; then
+	echo "Model launched with pid: "$!
+	export MODEL_PID=$!
 fi
