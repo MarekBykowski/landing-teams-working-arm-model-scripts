@@ -30,6 +30,8 @@
 
 RUN_SCRIPTS_DIR=$(dirname "$0")
 
+export FASTSIM_CMN_INTERNAL_RNSAM=1
+
 #NOTE: The OPTIONS below are misaligned on purpose so that they appear aligned when the script is called.
 incorrect_script_use () {
 	echo "Incorrect script use, call script as:"
