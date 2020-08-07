@@ -190,7 +190,7 @@ echo "SECURE_MEMORY=$SECURE_MEMORY"
 echo "NET=$NET"
 
 kern_addr=0x80080000
-dtb_addr=0x82000000
+dtb_addr=0x83000000
 initrd_addr=0x84000000
 
 if [ "$model_type" == "foundation" ]; then
