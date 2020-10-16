@@ -27,7 +27,7 @@ then
 fi
 
 cs700="Corstone-700"
-a5ds="CA5DS"
+cs500="Corstone-500"
 YOCTO_DISTRO="poky-tiny"
 YOCTO_IMAGE="arm-reference-image"
 
@@ -43,8 +43,16 @@ if [[ $1 =~ $cs700 ]]; then
   DIRNAME=corstone700
 
 else
-  OUTDIR=${BASEDIR}/../../build-${YOCTO_DISTRO}/tmp-${echo ${YOCTO_DISTRO} | sed 's/-/_/g'}/deploy/images/a5ds
-  DIRNAME=a5ds
+
+  if [ -z "$MACHINE" ]; then
+    MACHINE="corstone500"
+  fi
+
+  echo "Corstone500: using $MACHINE machine , $YOCTO_DISTRO DISTRO"
+
+  OUTDIR=${BASEDIR}/../../build-${YOCTO_DISTRO}/tmp-$(echo ${YOCTO_DISTRO} | sed 's/-/_/g')/deploy/images/${MACHINE}
+  DIRNAME=corstone500
+
 fi
 
 if [ -z "$2" -o "$2" == "-S" ]
@@ -59,11 +67,11 @@ then
         -C board.hostbridge.interfaceName="tap0" \
         -C board.smsc_91c111.enabled=1 \
         $2
-    elif [[ $1 =~ $a5ds ]]; then
-    echo "================== Launching CA5-DS Model ==============================="
+    elif [[ $1 =~ $cs500 ]]; then
+    echo "================== Launching Corstone-500 Model ==============================="
     $1 \
       -C board.flashloader0.fname="${OUTDIR}/bl1.bin" \
-      --data css.cluster.cpu0="${OUTDIR}/iota-tiny-image-a5ds.wic@0x80000000" \
+      --data css.cluster.cpu0="${OUTDIR}/${YOCTO_IMAGE}-${MACHINE}.wic.nopt@0x80000000" \
       $2
     else
        help

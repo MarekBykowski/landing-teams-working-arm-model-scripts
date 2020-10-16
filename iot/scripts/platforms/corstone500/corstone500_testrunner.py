@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 __copyright__ = """
-Copyright (c) 2019, Arm Limited and Contributors. All rights reserved.
+Copyright (c) 2019-2020, Arm Limited and Contributors. All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 """
@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.append(os.path.join((os.path.dirname(os.path.realpath(__file__))),'..','..','test'))
 from testrunner import TestRunner
-from a5ds_fvp import A5dsFVP
+from corstone500_fvp import A5dsFVP
 
 class A5dsTestRunner(TestRunner):
     def __init__(self):
@@ -19,11 +19,11 @@ class A5dsTestRunner(TestRunner):
         )
 
     def setSpecializationArguments(self):
-        # a5ds_fvp requires an image_dir argument for its constructor
+        # corstone500_fvp requires an image_dir argument for its constructor
         # to be able to locate various binaries. Add this as a command-line
         # argument
         self.parser.add_argument("--image_dir", type=str,
-            help="Directory containing the a5ds images")
+            help="Directory containing the Corstone-500 images")
 
     def parseSpecializationArguments(self, args):
         def tryParseStringArg(arg, argstring):
@@ -48,8 +48,8 @@ class A5dsTestRunner(TestRunner):
             'commands'      :   [
                                     ('w', "uname -srmn"),
             ],
-            'host_ver_strs' : ["Linux a5ds 5.2.0 armv7l"],
-            'host_stop_str' : "Linux a5ds 5.2.0 armv7l"
+            'host_ver_strs' : ["Linux corstone500 5.3.18-yocto-standard armv7l"],
+            'host_stop_str' : "Linux corstone500 5.3.18-yocto-standard armv7l"
         })
 
 if __name__ == "__main__":

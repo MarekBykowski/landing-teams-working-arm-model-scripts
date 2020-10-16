@@ -2,7 +2,7 @@
 # Python 2.7 is <required> for fm.debug
 
 __copyright__ = """
-Copyright (c) 2019, Arm Limited and Contributors. All rights reserved.
+Copyright (c) 2019-2020, Arm Limited and Contributors. All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 """
@@ -13,16 +13,17 @@ a5ds_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join((a5ds_dir),'..','..', 'test'))
 from fvp_wrapper import FVPWrapper, TelnetWatcher
 
-""" a5ds_fvp.py
-This file contains the a5ds FVP subclass of the generic FVP wrapper class.
+""" corstone500_fvp.py
+This file contains the Corstone-500 FVP subclass of the generic FVP wrapper class.
 Upon instantiation, telnet watchers are created for each UART exposed by the
 FVP, and - using the provided test specification - watchers are set up with their
 respective stop and verification conditions.
+CA5DS has been rebranded to Corstone-500.
 """
 
 
 """a5dsDefaultConfig
-default a5ds configuration parameters.
+default Corstone-500 configuration parameters.
 Note that these are fully platform dependant, and are only specified in the
 following map to provide a clear overview of what the configuration constants
 of this script are.
@@ -45,14 +46,14 @@ a5dsDefaultConfig = {
     "host_telnet_port0"     : 5000,
 
     # =============== Test parameters ==============
-    "linux_login_prompt"    : "a5ds login:",
+    "linux_login_prompt"    : "corstone500 login:",
     "linux_user"            : "root",
-    "linux_shstring"        : "root@a5ds:~# "
+    "linux_shstring"        : "root@corstone500:~# "
 }
 
 
 """ a5dsDefaultTestspec
-Test-specification parameters for a5ds.
+Test-specification parameters for Corstone-500.
 Note that this is fully platform-dependant, and only used during the
 initialization of a5dsFVP.
 """
@@ -69,7 +70,7 @@ class A5dsFVP(FVPWrapper):
         FVPWrapper.__init__(
             self,
             fvp_path=fvp_path,
-            fvp_name="A5ds",
+            fvp_name="corstone500",
             usermode=usermode,
             work_dir=a5ds_dir,
             fvp_timeout=fvp_timeout,
@@ -113,7 +114,7 @@ class A5dsFVP(FVPWrapper):
     def getModelData(self):
         # Assign images to FVP flashloaders
         fvp_data = {}
-        fvp_data[self.config['host_cpu0']] = os.path.join(self.image_dir, "iota-tiny-image-a5ds.wic" + "@" + self.config['address1'])
+        fvp_data[self.config['host_cpu0']] = os.path.join(self.image_dir, "arm-reference-image-corstone500.wic.nopt" + "@" + self.config['address1'])
         print(fvp_data)
         return fvp_data
 
