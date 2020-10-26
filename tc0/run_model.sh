@@ -30,8 +30,6 @@
 
 RUN_SCRIPTS_DIR=$(dirname "$0")
 
-export FASTSIM_CMN_INTERNAL_RNSAM=1
-
 #NOTE: The OPTIONS below are misaligned on purpose so that they appear aligned when the script is called.
 incorrect_script_use () {
 	echo "Incorrect script use, call script as:"
@@ -39,7 +37,7 @@ incorrect_script_use () {
 	echo "OPTIONS:"
 	echo "-m, --model				path to model"
 	echo "-d, --distro				distro version, values supported [poky, android-nano, android-swr]"
-	echo "-g, --generate-android-image		[OPTIONAL] generate android image and ramdisk, values supported [true, false], DEFAULT: true"
+	echo "-a, --avb				[OPTIONAL] avb boot, values supported [true, false], DEFAULT: false"
 	echo "-t, --tap-interface			[OPTIONAL] tap interface"
 	echo "-e, --extra-model-params		[OPTIONAL] extra model parameters"
 	echo "If using an android distro, export ANDROID_PRODUCT_OUT variable to point to android out directory"
@@ -77,14 +75,11 @@ check_file_exists_and_exit () {
 check_android_images () {
 	check_file_exists_and_exit $ANDROID_PRODUCT_OUT/system.img
 	check_file_exists_and_exit $ANDROID_PRODUCT_OUT/userdata.img
+	[ "$AVB" == true ] && check_file_exists_and_exit $ANDROID_PRODUCT_OUT/vbmeta.img
+	[ "$AVB" == true ] && check_file_exists_and_exit $ANDROID_PRODUCT_OUT/boot.img
 }
 
-make_ramdisk_android_image () {
-	./"$RUN_SCRIPTS_DIR"/add-uboot-header.sh
-	./"$RUN_SCRIPTS_DIR"/create_android_image.sh
-}
-
-GENERATE_ANDROID_IMAGE=true
+AVB=false
 
 while [[ $# -gt 0 ]]
 do
@@ -111,8 +106,8 @@ do
 		    shift
 		    shift
 		    ;;
-	    -g|--generate-android-image)
-		    GENERATE_ANDROID_IMAGE="$2"
+	    -a|--avb)
+		    AVB="$2"
 		    shift
 		    shift
 		    ;;
@@ -125,7 +120,7 @@ done
 [ -z "$DISTRO" ] && incorrect_script_use || echo "DISTRO=$DISTRO"
 echo "TAP_INTERFACE=$TAP_INTERFACE"
 echo "EXTRA_MODEL_PARAMS=$EXTRA_MODEL_PARAMS"
-echo "GENERATE_ANDROID_IMAGE=$GENERATE_ANDROID_IMAGE"
+echo "AVB=$AVB"
 
 YOCTO_DIR="$RUN_SCRIPTS_DIR/../../"
 
@@ -135,33 +130,32 @@ if [ ! -f "$MODEL" ]; then
 fi
 
 YOCTO_OUTDIR="${YOCTO_DIR}"/build-poky/tmp-poky/deploy/images/tc0/
-
 check_dir_exists_and_exit $YOCTO_OUTDIR "firmware and kernel images"
 
 case $DISTRO in
     poky)
-		DISTRO_MODEL_PARAMS="--data board.cpu=$YOCTO_OUTDIR/core-image-minimal-tc0.cpio.gz.u-boot@0x8000000"
+		DISTRO_MODEL_PARAMS="--data board.cpu=$YOCTO_OUTDIR/fitImage-core-image-minimal-tc0-tc0@0x20000000"
         ;;
     android-nano)
 		[ -z "$ANDROID_PRODUCT_OUT" ] && echo "var ANDROID_PRODUCT_OUT is empty" && exit 1
 		check_dir_exists_and_exit $ANDROID_PRODUCT_OUT "android build images"
 		check_substring_and_exit $ANDROID_PRODUCT_OUT "tc0_nano"
 		check_android_images
-		[ "$GENERATE_ANDROID_IMAGE" == true ] && make_ramdisk_android_image
-		DISTRO_MODEL_PARAMS="--data board.cpu=$ANDROID_PRODUCT_OUT/ramdisk_uboot.img@0x8000000 \
-		-C board.virtioblockdevice.image_path=$ANDROID_PRODUCT_OUT/android.img \
-		"
-		;;
+		DISTRO_MODEL_PARAMS="-C board.mmc.p_mmc_file=$ANDROID_PRODUCT_OUT/android.img"
+		[ "$AVB" == true ] || DISTRO_MODEL_PARAMS="$DISTRO_MODEL_PARAMS \
+			--data board.cpu=$ANDROID_PRODUCT_OUT/ramdisk_uboot.img@0x8000000 \
+			--data board.cpu=$YOCTO_OUTDIR/Image@0x80000 "
+        ;;
     android-swr)
 		[ -z "$ANDROID_PRODUCT_OUT" ] && echo "var ANDROID_PRODUCT_OUT is empty" && exit 1
 		check_dir_exists_and_exit $ANDROID_PRODUCT_OUT "android build images"
 		check_substring_and_exit $ANDROID_PRODUCT_OUT "tc0_swr"
 		check_android_images
-		[ "$GENERATE_ANDROID_IMAGE" == true ] && make_ramdisk_android_image
-		DISTRO_MODEL_PARAMS="--data board.cpu=$ANDROID_PRODUCT_OUT/ramdisk_uboot.img@0x8000000 \
-		-C board.virtioblockdevice.image_path=$ANDROID_PRODUCT_OUT/android.img \
-		"
-		;;
+		DISTRO_MODEL_PARAMS="-C board.mmc.p_mmc_file=$ANDROID_PRODUCT_OUT/android.img"
+		[ "$AVB" == true ] || DISTRO_MODEL_PARAMS="$DISTRO_MODEL_PARAMS \
+			--data board.cpu=$ANDROID_PRODUCT_OUT/ramdisk_uboot.img@0x8000000 \
+			--data board.cpu=$YOCTO_OUTDIR/Image@0x80000 "
+        ;;
     *) echo "bad option for distro $3"; incorrect_script_use
         ;;
 esac
@@ -180,14 +174,13 @@ LOGS_DIR="$RUN_SCRIPTS_DIR"/logs
 mkdir -p $LOGS_DIR
 
 "$MODEL" \
---data board.cpu=$YOCTO_OUTDIR/Image@0x80000 \
 -C css.scp.ROMloader.fname=$YOCTO_OUTDIR/scp_romfw.bin \
 -C css.trustedBootROMloader.fname=$YOCTO_OUTDIR/bl1-tc0.bin \
 -C board.flashloader0.fname=$YOCTO_OUTDIR/fip-tc0.bin \
 -C soc.pl011_uart0.out_file=$LOGS_DIR/uart0_soc.log \
 -C soc.pl011_uart1.out_file=$LOGS_DIR/uart1_soc.log \
 -C css.pl011_uart_ap.out_file=$LOGS_DIR/uart_ap.log \
--C css.scp.pl011_uart_scp.out_file=$LOGS_DIR/uart_scp.log \
+-C displayController=2 \
 ${TAP_INTERFACE_MODEL_PARAMS} \
 ${DISTRO_MODEL_PARAMS} \
 ${EXTRA_MODEL_PARAMS} \
