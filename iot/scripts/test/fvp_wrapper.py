@@ -318,6 +318,10 @@ class FVPWrapper(object):
                 g_fvp_cmd.append("-C")
                 g_fvp_cmd.append(param+"="+param_val)
 
+            for param,param_val in self.fvp_data.items() :
+                g_fvp_cmd.append("--data")
+                g_fvp_cmd.append(param+"="+param_val)
+
             print("FVP commandline:")
             print(g_fvp_cmd)
 
@@ -344,12 +348,6 @@ class FVPWrapper(object):
             self.fvp = NetworkModel(g_model_hostname, g_model_port)
 
             cpu = self.fvp.get_cpus()[0]
-
-            for key,value in self.fvp_data.items():
-                fop = open(value[:-11], "rb")
-                image = bytearray(fop.read())
-                location = value[len(value)-10:len(value)]
-                cpu.write_memory(int(location,0), image)
 
         except Exception as e:
 
