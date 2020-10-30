@@ -32,6 +32,7 @@ import multiprocessing
 import Queue
 import time
 from subprocess import Popen, PIPE, check_output
+import re
 
 from utils import printHeader0, printHeader1
 
@@ -42,7 +43,7 @@ g_model_port = 7100
 g_wait_fvp_ready = 30 #maximum waiting time for the model to be operational (in seconds)
 g_wait_fvp_finish = 30 #waiting for the model to terminate and release the TXT log files is expressed in seconds
 
-g_fvp_cmd = ["" , '-I']
+g_fvp_cmd = ["" , '-I', '-p']
 
 #verbose FVP command
 #g_fvp_cmd = ["" , '-I' , '-ii' , '-p']
@@ -73,6 +74,11 @@ def show_exception_details(e,e_fvp_path,e_fvp_params):
 # The function checks every second if the IRIS server port is open until max_wait_time delay expires
 #
 def wait_iris_server(fvp_process, iris_port, max_wait_time,wait_reason=0):
+
+    check_netstat_cmd = ["sh", "-c", 'which netstat | wc -l']
+    ret = check_output(check_netstat_cmd)
+    if int(ret) == 0:
+        raise Exception("netstat command not installed, please install it")
 
     netstat_cmd = ["sh", "-c", 'netstat -tpnl 2>/dev/null | egrep -i ":{0}.+{1}" | wc -l'.format(iris_port, fvp_process)]
 
@@ -315,7 +321,15 @@ class FVPWrapper(object):
             print("FVP commandline:")
             print(g_fvp_cmd)
 
-            Popen(g_fvp_cmd) #running the FVP with pyIRIS server enabled
+            fvp_process = Popen(g_fvp_cmd,stdout=PIPE) #running the FVP with pyIRIS server enabled
+
+            fvp_stdout = fvp_process.stdout.readline()
+
+            if re.match("Iris server started listening to port \d",fvp_stdout):
+                g_model_port=int(fvp_stdout.rpartition(' ')[-1])
+                print("Iris server port detected: " + str(g_model_port))
+            else:
+                raise Exception("Failure to detect Iris server port")
 
             fvp_ready = wait_iris_server(fvp_process=self.fvp_name.lower().replace("-",""),
                                          iris_port=g_model_port,max_wait_time=g_wait_fvp_ready,wait_reason=0)
