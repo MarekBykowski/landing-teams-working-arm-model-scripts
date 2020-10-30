@@ -300,11 +300,20 @@ class FVPWrapper(object):
             for watcher in self.watchers:
                 self.fvp_params.update(watcher.getParameters())
 
+            print("FVP parameters:")
+            print(self.fvp_params)
+
+            print("FVP data:")
+            print(self.fvp_data)
+
             g_fvp_cmd[0] = self.fvp_path
 
             for param,param_val in self.fvp_params.items() :
                 g_fvp_cmd.append("-C")
                 g_fvp_cmd.append(param+"="+param_val)
+
+            print("FVP commandline:")
+            print(g_fvp_cmd)
 
             Popen(g_fvp_cmd) #running the FVP with pyIRIS server enabled
 
