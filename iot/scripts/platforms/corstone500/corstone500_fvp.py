@@ -108,14 +108,12 @@ class A5dsFVP(FVPWrapper):
         # Assign images to FVP flashloaders
         fvp_params = {}
         fvp_params[self.config['board_ROMloader']] = os.path.join(self.image_dir, "bl1.bin")
-        print(fvp_params)
         return fvp_params
 
     def getModelData(self):
         # Assign images to FVP flashloaders
         fvp_data = {}
         fvp_data[self.config['host_cpu0']] = os.path.join(self.image_dir, "arm-reference-image-corstone500.wic.nopt" + "@" + self.config['address1'])
-        print(fvp_data)
         return fvp_data
 
 
