@@ -61,6 +61,9 @@ def show_exception_details(e,e_fvp_path,e_fvp_params):
     print(json.dumps(e_fvp_params, indent=4))
 
 
+def get_pid(name):
+    return int(check_output(["pidof","-s",name]))
+
 #
 # wait_iris_server:
 #
@@ -80,7 +83,8 @@ def wait_iris_server(fvp_process, iris_port, max_wait_time,wait_reason=0):
     if int(ret) == 0:
         raise Exception("netstat command not installed, please install it")
 
-    netstat_cmd = ["sh", "-c", 'netstat -tpnl 2>/dev/null | egrep -i ":{0}.+{1}" | wc -l'.format(iris_port, fvp_process)]
+    pid = get_pid(fvp_process)
+    netstat_cmd = ["sh", "-c", 'netstat -tpnl 2>/dev/null | egrep -i ":{0}.+{1}" | wc -l'.format(iris_port, pid)]
 
     i = 0
 
@@ -335,7 +339,7 @@ class FVPWrapper(object):
             else:
                 raise Exception("Failure to detect Iris server port")
 
-            fvp_ready = wait_iris_server(fvp_process=self.fvp_name.lower().replace("-",""),
+            fvp_ready = wait_iris_server(fvp_process=self.fvp_path,
                                          iris_port=g_model_port,max_wait_time=g_wait_fvp_ready,wait_reason=0)
 
             if fvp_ready == False:
@@ -537,7 +541,7 @@ class FVPWrapper(object):
             #terminates the model and allows the FVP to release the TXT log files
             self.fvp.release(True)
 
-            fvp_terminated = wait_iris_server(fvp_process=self.fvp_name.lower().replace("-", ""),
+            fvp_terminated = wait_iris_server(fvp_process=self.fvp_path,
                                          iris_port=g_model_port, max_wait_time=g_wait_fvp_finish, wait_reason=1)
 
             if fvp_terminated == False:
