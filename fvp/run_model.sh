@@ -109,8 +109,13 @@ else
 						-C cluster1.cpu3.CONFIG64=0                                 \
 						"
 			fi
+			if [[ 1 -eq 2 ]]; then
 			cores="-C cluster0.NUM_CORES=$CLUSTER0_NUM_CORES \
 				-C cluster1.NUM_CORES=$CLUSTER1_NUM_CORES"
+			fi
+
+			echo mb: $cores
+
 			;;
 	esac
 fi
@@ -229,6 +234,8 @@ if [ "$model_type" == "foundation" ]; then
 		dtb_param="--data=${DTB}@${dtb_addr}"
 	fi
 
+	echo -e "\n\nfoundation\n\n"
+
 	cmd="$MODEL \
 	--cores=$CLUSTER0_NUM_CORES \
 	$secure_memory_param \
@@ -244,6 +251,8 @@ if [ "$model_type" == "foundation" ]; then
 	$net \
 	--arm-v8.0
 	"
+	#--cadi-server \
+	#--print-port-number \
 else
 	CACHE_STATE_MODELLED=${CACHE_STATE_MODELLED:=0}
 	echo "CACHE_STATE_MODELLED=$CACHE_STATE_MODELLED"
@@ -255,9 +264,17 @@ else
 			echo MACADDR=$MACADDR
 		fi
 
-		net="-C bp.hostbridge.interfaceName=ARM$USER \
-		-C bp.smsc_91c111.enabled=true \
-		-C bp.smsc_91c111.mac_address=${MACADDR}"
+		if [[ 1 -eq 2 ]]; then
+			net="-C bp.hostbridge.interfaceName=ARM$USER \
+			-C bp.smsc_91c111.enabled=true \
+			-C bp.smsc_91c111.mac_address=${MACADDR}"
+		else
+			set -x
+			net="-C bp.hostbridge.interfaceName=armnet \
+			-C bp.smsc_91c111.enabled=true \
+			-C bp.smsc_91c111.mac_address=${MACADDR}"
+			set +x
+		fi
 	fi
 
 	if [ "$DISK" != "" ]; then
@@ -293,6 +310,8 @@ else
 	echo "UART0_LOG=$UART0_LOG"
 	echo "UART1_LOG=$UART1_LOG"
 
+	echo -e "\n\nfvp\n\n"
+
 	cmd="$MODEL \
 	-C pctl.startup=0.0.0.0 \
 	-C bp.secure_memory=$SECURE_MEMORY \
@@ -312,7 +331,10 @@ else
 	$disk_param \
 	$VARS \
 	$net \
-	$arch_params
+	$arch_params \
+	--iris-server \
+	--print-port-number \
+	--run \
 	"
 fi
 
