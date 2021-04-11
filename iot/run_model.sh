@@ -40,6 +40,7 @@ if [[ $1 =~ $cs700 ]]; then
   echo "Corstone700: using $MACHINE machine , $YOCTO_DISTRO DISTRO"
 
   OUTDIR=${BASEDIR}/../../build-${YOCTO_DISTRO}/tmp-$(echo ${YOCTO_DISTRO} | sed 's/-/_/g')/deploy/images/${MACHINE}
+  OUTDIR=/home/marek/corstone/build-poky-tiny/tmp-poky_tiny/deploy/images/corstone700-fvp
   DIRNAME=corstone700
 
 else
